@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>ល្បែងរាប់ និង ផ្គូផ្គងចំណុច</title>
+<meta name="theme-color" content="#4F7D53">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="រាប់ចំណុច">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-180.png">
+
+<style>
+  :root{
+    --paper:#FBF3E3;
+    --paper-line:#E7D9BC;
+    --ink:#2B3A34;
+    --ink-soft:#5C6B63;
+    --green:#4F7D53;
+    --green-dark:#375C3A;
+    --yellow:#F2B705;
+    --coral:#E4623F;
+    --card-bg:#FFFFFF;
+    --shadow: 0 4px 0 rgba(43,58,52,0.14);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      repeating-linear-gradient(180deg, transparent, transparent 37px, var(--paper-line) 38px),
+      var(--paper);
+    color:var(--ink);
+    font-family:'Khmer OS Battambang','Leelawadee UI','Noto Sans Khmer',serif;
+    min-height:100vh;
+    -webkit-tap-highlight-color: transparent;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.display{
+    font-family:'Khmer OS Muol Light','Khmer OS Battambang','Leelawadee UI','Noto Sans Khmer',sans-serif;
+    letter-spacing:0.5px;
+    font-weight:400;
+  }
+  button{
+    font-family:'Khmer OS Battambang','Leelawadee UI','Noto Sans Khmer',serif;
+    cursor:pointer;
+    border:none;
+    background:none;
+  }
+  .screen{
+    min-height:100vh;
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    padding:22px 16px 100px;
+  }
+  .screen.active{display:flex;}
+
+  /* ---------- Setup screen ---------- */
+  #setup .setup-card{
+    background:var(--card-bg);
+    border-radius:22px;
+    box-shadow: var(--shadow);
+    border:3px solid var(--ink);
+    padding:28px 26px 32px;
+    max-width:560px;
+    width:100%;
+  }
+  .title-block{
+    text-align:center;
+    margin-bottom:6px;
+  }
+  .title-block h1{
+    font-size:clamp(28px,6vw,40px);
+    color:var(--green-dark);
+    margin:0;
+  }
+  .title-block p{
+    margin:6px 0 0;
+    color:var(--ink-soft);
+    font-size:15px;
+  }
+  .pencil-row{
+    text-align:center;
+    font-size:22px;
+    margin:10px 0 20px;
+    letter-spacing:6px;
+  }
+  .field{
+    margin-bottom:20px;
+  }
+  .field label{
+    display:block;
+    font-size:16px;
+    margin-bottom:9px;
+    color:var(--ink);
+  }
+  .opt-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .opt-btn{
+    flex:1 1 auto;
+    min-width:52px;
+    padding:11px 14px;
+    border-radius:12px;
+    border:2.5px solid var(--ink);
+    background:#fff;
+    font-size:17px;
+    font-weight:700;
+    transition:transform .12s ease, background .15s ease, color .15s ease;
+  }
+  .opt-btn:active{transform:scale(0.94);}
+  .opt-btn.selected{
+    background:var(--green);
+    color:#fff;
+    border-color:var(--green-dark);
+  }
+  .start-btn{
+    width:100%;
+    margin-top:8px;
+    padding:16px;
+    border-radius:14px;
+    background:var(--coral);
+    color:#fff;
+    font-family:'Khmer OS Muol Light','Khmer OS Battambang','Leelawadee UI','Noto Sans Khmer',sans-serif;
+    font-size:22px;
+    box-shadow:0 5px 0 #a8432a;
+    transition:transform .1s ease, box-shadow .1s ease;
+  }
+  .start-btn:active{
+    transform:translateY(4px);
+    box-shadow:0 1px 0 #a8432a;
+  }
+  .howto-link{
+    display:block;
+    text-align:center;
+    margin-top:16px;
+    color:var(--green-dark);
+    font-size:14px;
+    text-decoration:underline;
+  }
+
+  /* ---------- Modal ---------- */
+  .modal-back{
+    position:fixed;inset:0;
+    background:rgba(43,58,52,0.55);
+    display:none;
+    align-items:center;justify-content:center;
+    z-index:50;
+    padding:18px;
+  }
+  .modal-back.active{display:flex;}
+  .modal{
+    background:#fff;
+    border-radius:18px;
+    border:3px solid var(--ink);
+    max-width:480px;
+    width:100%;
+    padding:24px;
+    max-height:80vh;
+    overflow-y:auto;
+  }
+  .modal h2{color:var(--green-dark);margin-top:0;font-size:24px;}
+  .modal ol{padding-left:20px;line-height:1.85;font-size:15px;}
+  .modal-close{
+    display:block;
+    margin:18px auto 0;
+    background:var(--ink);
+    color:#fff;
+    padding:10px 26px;
+    border-radius:10px;
+    font-size:15px;
+  }
+
+  /* ---------- Game screen ---------- */
+  #game{width:100%;max-width:1000px;padding-top:14px;}
+  .topbar{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:16px;
+  }
+  .round-pill{
+    background:var(--ink);
+    color:#fff;
+    padding:8px 16px;
+    border-radius:20px;
+    font-family:'Khmer OS Muol Light','Khmer OS Battambang','Leelawadee UI','Noto Sans Khmer',sans-serif;
+    font-size:15px;
+    white-space:nowrap;
+  }
+  .icon-btn{
+    width:40px;height:40px;
+    border-radius:50%;
+    background:#fff;
+    border:2.5px solid var(--ink);
+    font-size:18px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .teams-row{
+    width:100%;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-bottom:18px;
+  }
+  .team-chip{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:#fff;
+    border:3px solid var(--ink);
+    border-radius:16px;
+    padding:8px 14px;
+    font-size:15px;
+    position:relative;
+    transition:transform .12s ease;
+  }
+  .team-chip:active{transform:scale(0.96);}
+  .team-chip .dot{width:14px;height:14px;border-radius:50%;}
+  .team-chip .score{font-family:'Khmer OS Muol Light','Khmer OS Battambang','Leelawadee UI','Noto Sans Khmer',sans-serif;font-size:16px;}
+  .team-chip.active{
+    box-shadow:0 0 0 3px var(--yellow);
+    background:#FFF7DF;
+  }
+  .team-chip .turn-badge{
+    position:absolute;
+    top:-11px;left:50%;
+    transform:translateX(-50%);
+    background:var(--yellow);
+    color:var(--ink);
+    font-size:10px;
+    padding:2px 8px;
+    border-radius:8px;
+    border:2px solid var(--ink);
+    font-family:'Khmer OS Battambang','Leelawadee UI','Noto Sans Khmer',serif;
+    white-space:nowrap;
+  }
+
+  .board{
+    display:grid;
+    grid-template-columns: 1.35fr 1fr;
+    gap:18px;
+    width:100%;
+  }
+  @media (max-width:780px){
+    .board{grid-template-columns:1fr;}
+  }
+  .panel{
+    background:#fffdf7;
+    border:3px dashed var(--ink);
+    border-radius:20px;
+    padding:16px;
+  }
+  .panel h3{
+    margin:0 0 12px;
+    font-size:18px;
+    color:var(--green-dark);
+    text-align:center;
+  }
+  .obj-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:14px;
+  }
+  .obj-card{
+    background:var(--card-bg);
+    border:3px solid var(--ink);
+    border-radius:16px;
+    height:130px;
+    position:relative;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+    transition:background .15s ease, border-color .15s ease;
+  }
+  .obj-card .obj-label{
+    position:absolute;
+    top:6px;left:8px;
+    font-size:12.5px;
+    background:rgba(255,255,255,0.85);
+    padding:2px 7px;
+    border-radius:8px;
+    z-index:2;
+    color:var(--ink-soft);
+  }
+  .obj-card .icon-item{
+    position:absolute;
+    font-size:26px;
+    user-select:none;
+    pointer-events:none;
+  }
+  .obj-card.matched{
+    background:#EAF6EA;
+    border-color:var(--green-dark);
+  }
+  .obj-card.dragover{
+    background:#FFF6E0;
+    border-color:var(--yellow);
+  }
+  .matched-stamp{
+    position:absolute;
+    right:8px;bottom:6px;
+    background:var(--green);
+    color:#fff;
+    font-size:11px;
+    padding:3px 9px;
+    border-radius:20px;
+    z-index:3;
+    font-family:'Khmer OS Battambang','Leelawadee UI','Noto Sans Khmer',serif;
+    display:flex;gap:5px;align-items:center;
+  }
+  .matched-stamp .mini-dot{
+    width:6px;height:6px;border-radius:50%;background:#fff;
+  }
+
+  .tray{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    justify-content:center;
+  }
+  .dot-card{
+    width:92px;
+    min-height:80px;
+    background:var(--card-bg);
+    border:3px solid var(--ink);
+    border-radius:14px;
+    box-shadow:var(--shadow);
+    display:flex;
+    flex-wrap:wrap;
+    align-content:center;
+    justify-content:center;
+    gap:5px;
+    padding:9px;
+    touch-action:none;
+    user-select:none;
+  }
+  .dot-card.used{visibility:hidden;}
+  .dot-card .pip{
+    width:12px;height:12px;
+    border-radius:50%;
+    background:var(--ink);
+  }
+  .dragging-ghost{
+    position:fixed;
+    z-index:200;
+    pointer-events:none;
+    opacity:0.95;
+    transform:scale(1.08) rotate(-4deg);
+  }
+  .shake{animation:shake .35s ease;}
+  @keyframes shake{
+    0%,100%{transform:translateX(0);}
+    25%{transform:translateX(-7px);}
+    75%{transform:translateX(7px);}
+  }
+  .pop{animation:pop .3s ease;}
+  @keyframes pop{
+    0%{transform:scale(0.7);}
+    60%{transform:scale(1.08);}
+    100%{transform:scale(1);}
+  }
+
+  .round-overlay{
+    margin-top:22px;
+    background:#fff;
+    border:3px solid var(--ink);
+    border-radius:18px;
+    padding:22px;
+    text-align:center;
+    max-width:420px;
+  }
+  .round-overlay h2{color:var(--green-dark);margin:0 0 6px;font-size:24px;}
+  .round-overlay .btns{
+    display:flex;
+    gap:12px;
+    margin-top:16px;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+  .btn-primary,.btn-secondary{
+    padding:12px 22px;
+    border-radius:12px;
+    font-family:'Khmer OS Muol Light','Khmer OS Battambang','Leelawadee UI','Noto Sans Khmer',sans-serif;
+    font-size:16px;
+  }
+  .btn-primary{background:var(--green);color:#fff;box-shadow:0 4px 0 var(--green-dark);}
+  .btn-secondary{background:#fff;color:var(--ink);border:2.5px solid var(--ink);}
+  .btn-primary:active,.btn-secondary:active{transform:translateY(3px);}
+
+  .teacher-bar{
+    position:fixed;
+    bottom:0;left:0;right:0;
+    background:var(--ink);
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+    flex-wrap:wrap;
+    z-index:10;
+  }
+  .teacher-bar button{
+    color:#fff;
+    background:rgba(255,255,255,0.12);
+    padding:9px 16px;
+    border-radius:10px;
+    font-size:14px;
+    display:flex;align-items:center;gap:6px;
+  }
+  .teacher-bar button:active{background:rgba(255,255,255,0.25);}
+
+  /* ---------- End screen ---------- */
+  #end .end-card{
+    background:#fff;
+    border:3px solid var(--ink);
+    border-radius:22px;
+    padding:30px 26px;
+    max-width:480px;
+    width:100%;
+    text-align:center;
+  }
+  #end h1{color:var(--coral);font-size:32px;margin:0 0 4px;}
+  .rank-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--paper);
+    border:2.5px solid var(--ink);
+    border-radius:12px;
+    padding:12px 16px;
+    margin-top:12px;
+  }
+  .rank-row .left{display:flex;align-items:center;gap:10px;}
+  .rank-medal{font-size:22px;}
+  .rank-score{font-family:'Khmer OS Muol Light','Khmer OS Battambang','Leelawadee UI','Noto Sans Khmer',sans-serif;font-size:20px;}
+</style>
+</head>
+<body>
+
+<!-- ===================== SETUP SCREEN ===================== -->
+<section id="setup" class="screen active">
+  <div class="setup-card">
+    <div class="title-block">
+      <div class="pencil-row">✏️ 🍃 ⭐ 🍎 🌸</div>
+      <h1>ល្បែងរាប់ និង ផ្គូផ្គងចំណុច</h1>
+      <p>សម្រាប់សកម្មភាពរៀនជាក្រុមតូចៗក្នុងថ្នាក់</p>
+    </div>
+
+    <div class="field">
+      <label>១. ចំនួនក្រុមសិស្ស</label>
+      <div class="opt-row" id="teamCountRow"></div>
+    </div>
+
+    <div class="field">
+      <label>២. កម្រិតលេខ (រាប់ដល់)</label>
+      <div class="opt-row" id="maxCountRow">
+        <button class="opt-btn" data-max="5">១ – ៥</button>
+        <button class="opt-btn selected" data-max="10">១ – ១០</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>៣. ចំនួនគូផ្គូផ្គងក្នុងមួយជុំ</label>
+      <div class="opt-row" id="pairsRow"></div>
+    </div>
+
+    <button class="start-btn" id="startBtn">ចាប់ផ្ដើមលេង</button>
+    <a class="howto-link" id="howtoOpen">របៀបលេង / ណែនាំសម្រាប់លោកគ្រូអ្នកគ្រូ</a>
+  </div>
+</section>
+
+<!-- ===================== HOW-TO MODAL ===================== -->
+<div class="modal-back" id="modalBack">
+  <div class="modal">
+    <h2>ណែនាំសម្រាប់លោកគ្រូ អ្នកគ្រូ</h2>
+    <ol>
+      <li>បែងចែកសិស្សជាក្រុមតូចៗ ហើយកំណត់ចំនួនក្រុមនៅអេក្រង់នេះ។</li>
+      <li>សិស្សក្នុងក្រុមជួយគ្នារាប់ចំនួនវត្ថុនៅក្នុងប្រអប់ម្ខាង រួចអូស “បណ្ណចំណុច” ដែលមានចំណុចត្រូវនឹងចំនួននោះ មកដាក់លើប្រអប់វត្ថុ។</li>
+      <li>ប្រសិនបើផ្គូផ្គងត្រូវ ក្រុមដែលកំពុងលេង នឹងទទួលបានពិន្ទុ ហើយវេនប្ដូរទៅក្រុមបន្ទាប់ដោយស្វ័យប្រវត្តិ។</li>
+      <li>លោកគ្រូអាចប្ដូរវេនផ្ទាល់ដោយចុចលើឈ្មោះក្រុមណាមួយ ខណៈកំពុងដើរជុំវិញជួយក្រុមដែលជួបការលំបាក។</li>
+      <li>ពេលផ្គូផ្គងអស់ ចុច “ជុំបន្ទាប់” ដើម្បីលេងបន្ត ឬ “បញ្ចប់ការលេង” ដើម្បីមើលលទ្ធផលក្រុមទាំងអស់។</li>
+    </ol>
+    <button class="modal-close" id="modalClose">យល់ហើយ</button>
+  </div>
+</div>
+
+<!-- ===================== GAME SCREEN ===================== -->
+<section id="game" class="screen">
+  <div class="topbar">
+    <div class="round-pill" id="roundPill">ជុំទី ១</div>
+    <button class="icon-btn" id="helpBtnGame" title="របៀបលេង">?</button>
+  </div>
+  <div class="teams-row" id="teamsRow"></div>
+
+  <div class="board">
+    <div class="panel">
+      <h3>រាប់វត្ថុ ហើយអូសបណ្ណត្រូវមកដាក់</h3>
+      <div class="obj-grid" id="objGrid"></div>
+    </div>
+    <div class="panel">
+      <h3>បណ្ណចំណុច</h3>
+      <div class="tray" id="dotTray"></div>
+    </div>
+  </div>
+
+  <div class="round-overlay" id="roundOverlay" style="display:none;">
+    <h2>ល្អណាស់! ជុំនេះចប់ហើយ 🎉</h2>
+    <p id="roundSummary"></p>
+    <div class="btns">
+      <button class="btn-primary" id="nextRoundBtn">ជុំបន្ទាប់</button>
+      <button class="btn-secondary" id="endGameBtn">បញ្ចប់ការលេង</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== END SCREEN ===================== -->
+<section id="end" class="screen">
+  <div class="end-card">
+    <h1>លទ្ធផលចុងក្រោយ</h1>
+    <p style="color:var(--ink-soft);margin-top:0;">អបអរសាទរដល់ក្រុមទាំងអស់!</p>
+    <div id="rankList"></div>
+    <button class="start-btn" style="margin-top:22px;" id="playAgainBtn">លេងម្ដងទៀត</button>
+  </div>
+</section>
+
+<!-- ===================== TEACHER BAR ===================== -->
+<div class="teacher-bar" id="teacherBar" style="display:none;">
+  <button id="reshuffleBtn">🔄 ច្របល់ជុំនេះ</button>
+  <button id="backSetupBtn">⚙️ ការកំណត់</button>
+</div>
+
+<script>
+(function(){
+  const OBJECTS = [
+    {name:'ខ្មៅដៃ', emoji:'✏️'},
+    {name:'ស្លឹកឈើ', emoji:'🍃'},
+    {name:'ផ្កា', emoji:'🌸'},
+    {name:'ផ្លែប៉ោម', emoji:'🍎'},
+    {name:'ត្រី', emoji:'🐟'},
+    {name:'ផ្កាយ', emoji:'⭐'},
+    {name:'សៀវភៅ', emoji:'📕'},
+    {name:'ប៊ិច', emoji:'🖊️'},
+  ];
+  const TEAM_COLORS = ['#E4623F','#4F7D53','#4A90A4','#C9A227','#8B5FBF','#D9738C'];
+  const TEAM_NAMES = ['ក្រុម ១','ក្រុម ២','ក្រុម ៣','ក្រុម ៤','ក្រុម ៥','ក្រុម ៦'];
+
+  let settings = { teamCount:3, maxCount:10, pairs:5 };
+  let teams = [];
+  let activeTeamIdx = 0;
+  let round = 1;
+  let objectCards = [];
+  let dotCards = [];
+  let matchedCount = 0;
+
+  const $ = (id)=>document.getElementById(id);
+
+  /* ---------- Setup screen option buttons ---------- */
+  function buildOptRow(container, values, dataAttr, selected, onPick){
+    container.innerHTML='';
+    values.forEach(v=>{
+      const b=document.createElement('button');
+      b.className='opt-btn'+(v===selected?' selected':'');
+      b.textContent = dataAttr==='team' ? v+' ក្រុម' : v;
+      b.dataset[dataAttr]=v;
+      b.addEventListener('click',()=>{
+        [...container.children].forEach(c=>c.classList.remove('selected'));
+        b.classList.add('selected');
+        onPick(v);
+      });
+      container.appendChild(b);
+    });
+  }
+
+  function pairsOptionsFor(maxCount){
+    return maxCount===5 ? [3,4,5] : [4,5,6,7,8];
+  }
+
+  function refreshPairsRow(){
+    const opts = pairsOptionsFor(settings.maxCount);
+    if(!opts.includes(settings.pairs)) settings.pairs = opts[Math.min(2,opts.length-1)];
+    buildOptRow($('pairsRow'), opts, 'pairs', settings.pairs, v=>settings.pairs=v);
+  }
+
+  buildOptRow($('teamCountRow'), [2,3,4,5,6], 'team', settings.teamCount, v=>settings.teamCount=v);
+  refreshPairsRow();
+
+  $('maxCountRow').querySelectorAll('.opt-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      $('maxCountRow').querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      settings.maxCount = parseInt(btn.dataset.max,10);
+      refreshPairsRow();
+    });
+  });
+
+  $('howtoOpen').addEventListener('click',(e)=>{e.preventDefault(); $('modalBack').classList.add('active');});
+  $('helpBtnGame').addEventListener('click',()=> $('modalBack').classList.add('active'));
+  $('modalClose').addEventListener('click',()=> $('modalBack').classList.remove('active'));
+  $('modalBack').addEventListener('click',(e)=>{ if(e.target===$('modalBack')) $('modalBack').classList.remove('active'); });
+
+  $('startBtn').addEventListener('click', startGame);
+  $('playAgainBtn').addEventListener('click', ()=>{ showScreen('setup'); });
+  $('backSetupBtn').addEventListener('click', ()=>{ showScreen('setup'); });
+  $('reshuffleBtn').addEventListener('click', ()=> newRound(false));
+  $('nextRoundBtn').addEventListener('click', ()=> newRound(true));
+  $('endGameBtn').addEventListener('click', endGame);
+
+  function showScreen(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    $(id).classList.add('active');
+    $('teacherBar').style.display = (id==='game') ? 'flex' : 'none';
+  }
+
+  function startGame(){
+    teams = [];
+    for(let i=0;i<settings.teamCount;i++){
+      teams.push({name:TEAM_NAMES[i], color:TEAM_COLORS[i], score:0});
+    }
+    activeTeamIdx = 0;
+    round = 1;
+    showScreen('game');
+    renderTeams();
+    newRound(true);
+  }
+
+  function renderTeams(){
+    const row = $('teamsRow');
+    row.innerHTML='';
+    teams.forEach((t,i)=>{
+      const chip=document.createElement('button');
+      chip.className='team-chip'+(i===activeTeamIdx?' active':'');
+      chip.innerHTML = (i===activeTeamIdx?'<div class="turn-badge">កំពុងលេង</div>':'')+
+        '<div class="dot" style="background:'+t.color+'"></div>'+
+        '<span>'+t.name+'</span><span class="score">'+t.score+'</span>';
+      chip.addEventListener('click',()=>{ activeTeamIdx=i; renderTeams(); });
+      row.appendChild(chip);
+    });
+  }
+
+  function shuffle(arr){
+    for(let i=arr.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+    return arr;
+  }
+
+  function newRound(advanceRoundNumber){
+    if(advanceRoundNumber && objectCards.length) round++;
+    $('roundOverlay').style.display='none';
+    $('roundPill').textContent = 'ជុំទី '+toKhmerNumeral(round);
+    matchedCount = 0;
+
+    const pool = shuffle([...Array(settings.maxCount).keys()].map(n=>n+1));
+    const counts = shuffle(pool.slice(0, settings.pairs));
+    const objTypes = shuffle([...OBJECTS]).slice(0, settings.pairs);
+
+    objectCards = counts.map((c,i)=>({
+      id:'o'+i+'-'+Date.now(),
+      count:c,
+      name:objTypes[i].name,
+      emoji:objTypes[i].emoji,
+      matched:false
+    }));
+    dotCards = shuffle(objectCards.map(o=>o.count)).map((c,i)=>({
+      id:'d'+i+'-'+Date.now(),
+      count:c,
+      used:false
+    }));
+
+    renderObjGrid();
+    renderDotTray();
+  }
+
+  function renderObjGrid(){
+    const grid = $('objGrid');
+    grid.innerHTML='';
+    objectCards.forEach(card=>{
+      const el = document.createElement('div');
+      el.className='obj-card'+(card.matched?' matched':'');
+      el.dataset.id = card.id;
+      el.dataset.count = card.count;
+      let iconsHtml='';
+      for(let i=0;i<card.count;i++){
+        const left = 6 + Math.random()*72;
+        const top = 26 + Math.random()*62;
+        const rot = (Math.random()*36-18).toFixed(1);
+        const size = card.count>7 ? 18 : (card.count>4?22:26);
+        iconsHtml += '<span class="icon-item" style="left:'+left+'%;top:'+top+'%;transform:rotate('+rot+'deg);font-size:'+size+'px;">'+card.emoji+'</span>';
+      }
+      el.innerHTML =
+        '<div class="obj-label">'+card.name+'</div>' +
+        iconsHtml +
+        (card.matched ? '<div class="matched-stamp"><span class="mini-dot"></span> ត្រូវហើយ!</div>' : '');
+      grid.appendChild(el);
+    });
+  }
+
+  function renderDotTray(){
+    const tray = $('dotTray');
+    tray.innerHTML='';
+    dotCards.forEach(card=>{
+      const el=document.createElement('div');
+      el.className='dot-card'+(card.used?' used':'');
+      el.dataset.id=card.id;
+      el.dataset.count=card.count;
+      let pips='';
+      for(let i=0;i<card.count;i++) pips+='<span class="pip"></span>';
+      el.innerHTML=pips;
+      attachDrag(el);
+      tray.appendChild(el);
+    });
+  }
+
+  /* ---------- Pointer-based drag & drop ---------- */
+  function attachDrag(sourceEl){
+    sourceEl.addEventListener('pointerdown', (ev)=>{
+      if(sourceEl.classList.contains('used')) return;
+      ev.preventDefault();
+      const rect = sourceEl.getBoundingClientRect();
+      const ghost = sourceEl.cloneNode(true);
+      ghost.classList.add('dragging-ghost');
+      ghost.style.width = rect.width+'px';
+      ghost.style.left = rect.left+'px';
+      ghost.style.top = rect.top+'px';
+      document.body.appendChild(ghost);
+      sourceEl.style.visibility='hidden';
+
+      const offX = ev.clientX-rect.left;
+      const offY = ev.clientY-rect.top;
+
+      function move(e){
+        ghost.style.left = (e.clientX-offX)+'px';
+        ghost.style.top = (e.clientY-offY)+'px';
+        document.querySelectorAll('.obj-card').forEach(c=>c.classList.remove('dragover'));
+        ghost.style.display='none';
+        const under = document.elementFromPoint(e.clientX,e.clientY);
+        ghost.style.display='';
+        const target = under ? under.closest('.obj-card') : null;
+        if(target && !target.classList.contains('matched')) target.classList.add('dragover');
+      }
+
+      function up(e){
+        document.removeEventListener('pointermove',move);
+        document.removeEventListener('pointerup',up);
+        document.querySelectorAll('.obj-card').forEach(c=>c.classList.remove('dragover'));
+        ghost.style.display='none';
+        const under = document.elementFromPoint(e.clientX,e.clientY);
+        ghost.style.display='';
+        const target = under ? under.closest('.obj-card') : null;
+
+        if(target && !target.classList.contains('matched') && parseInt(target.dataset.count,10)===parseInt(sourceEl.dataset.count,10)){
+          handleCorrectMatch(sourceEl.dataset.id, target.dataset.id);
+        } else if(target){
+          target.classList.add('shake');
+          setTimeout(()=>target.classList.remove('shake'),350);
+        }
+        ghost.remove();
+        sourceEl.style.visibility='';
+      }
+
+      document.addEventListener('pointermove',move);
+      document.addEventListener('pointerup',up);
+    });
+  }
+
+  function handleCorrectMatch(dotId, objId){
+    const dot = dotCards.find(d=>d.id===dotId);
+    const obj = objectCards.find(o=>o.id===objId);
+    if(!dot || !obj) return;
+    dot.used = true;
+    obj.matched = true;
+    matchedCount++;
+
+    teams[activeTeamIdx].score++;
+    renderObjGrid();
+    renderDotTray();
+    renderTeams();
+
+    const justMatched = document.querySelector('.obj-card[data-id="'+objId+'"]');
+    if(justMatched) justMatched.classList.add('pop');
+
+    if(matchedCount >= objectCards.length){
+      setTimeout(showRoundComplete, 350);
+    } else {
+      activeTeamIdx = (activeTeamIdx+1) % teams.length;
+      renderTeams();
+    }
+  }
+
+  function showRoundComplete(){
+    $('roundSummary').textContent = 'ក្រុមទាំងអស់បានផ្គូផ្គងត្រឹមត្រូវចំនួន '+objectCards.length+' គូ។';
+    $('roundOverlay').style.display='block';
+  }
+
+  function endGame(){
+    const ranked = [...teams].sort((a,b)=>b.score-a.score);
+    const medals=['🥇','🥈','🥉'];
+    $('rankList').innerHTML = ranked.map((t,i)=>
+      '<div class="rank-row"><div class="left"><span class="rank-medal">'+(medals[i]||'🎖️')+'</span>'+
+      '<div class="dot" style="width:14px;height:14px;border-radius:50%;background:'+t.color+'"></div>'+
+      '<span>'+t.name+'</span></div><span class="rank-score">'+t.score+' ពិន្ទុ</span></div>'
+    ).join('');
+    showScreen('end');
+  }
+
+  function toKhmerNumeral(n){
+    const digits=['០','១','២','៣','៤','៥','៦','៧','៨','៩'];
+    return String(n).split('').map(d=>digits[parseInt(d,10)]).join('');
+  }
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js').catch(function (err) {
+      console.log('Service worker registration failed:', err);
+    });
+  });
+}
+</script>
+
+</body>
+</html>

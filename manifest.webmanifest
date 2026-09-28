@@ -1,0 +1,26 @@
+{
+  "name": "ល្បែងរាប់ និង ផ្គូផ្គងចំណុច",
+  "short_name": "រាប់ចំណុច",
+  "description": "ល្បែងសិក្សារាប់វត្ថុ និងផ្គូផ្គងបណ្ណចំណុច សម្រាប់សកម្មភាពរៀនជាក្រុម",
+  "lang": "km",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FBF3E3",
+  "theme_color": "#4F7D53",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
